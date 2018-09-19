@@ -78,10 +78,20 @@ class LinkedList<T extends LinkedNode> {
     };
   }
 
-  find(index: number, inclusive: boolean = false): [T | null, number] {
+  find(index: number, inclusive: boolean = false, includeBreak: boolean = false): [T | null, number] {
     let cur,
       next = this.iterator();
     while ((cur = next())) {
+      // allow empty <br> to be found so that it can be formatted.
+      if (includeBreak) {
+        let children = cur;
+        while (children && children.children && children.children.length === 1) {
+          children = children.children.head;
+        }
+        if (children.domNode.nodeName === 'BR') {
+          inclusive = true;
+        }
+      }
       let length = cur.length();
       if (
         index < length ||
@@ -106,15 +116,16 @@ class LinkedList<T extends LinkedNode> {
     index: number,
     length: number,
     callback: (cur: T, offset: number, length: number) => void,
+    includeBreak: boolean = false,
   ): void {
     if (length <= 0) return;
-    let [startNode, offset] = this.find(index);
+    let [startNode, offset] = this.find(index, false, includeBreak);
     let cur,
       curIndex = index - offset,
       next = this.iterator(startNode);
     while ((cur = next()) && curIndex < index + length) {
       let curLength = cur.length();
-      if (index > curIndex) {
+    if (index > curIndex) {
         callback(cur, index - curIndex, Math.min(length, curIndex + curLength - index));
       } else {
         callback(cur, 0, Math.min(curLength, index + length - curIndex));

@@ -84,7 +84,7 @@ class ContainerBlot extends ShadowBlot implements Parent {
         descendants = descendants.concat(child.descendants(criteria, index, lengthLeft));
       }
       lengthLeft -= length;
-    });
+    }, true); // fix retrieving format of empty line
     return descendants;
   }
 
@@ -98,7 +98,7 @@ class ContainerBlot extends ShadowBlot implements Parent {
   formatAt(index: number, length: number, name: string, value: any): void {
     this.children.forEachAt(index, length, function(child, offset, length) {
       child.formatAt(offset, length, name, value);
-    });
+    }, true);
   }
 
   insertAt(index: number, value: string, def?: any): void {
