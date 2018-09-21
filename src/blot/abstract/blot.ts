@@ -8,6 +8,8 @@ export interface Blot extends LinkedNode {
   next: Blot;
   domNode: Node;
 
+  statics(): any;
+
   attach(): void;
   clone(): Blot;
   detach(): void;

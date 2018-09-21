@@ -1,4 +1,5 @@
 import LinkedNode from './linked-node';
+import { Parent } from '../blot/abstract/blot';
 declare class LinkedList<T extends LinkedNode> {
     head: T | null;
     tail: T | null;
@@ -9,7 +10,7 @@ declare class LinkedList<T extends LinkedNode> {
     insertBefore(node: T | null, refNode: T | null): void;
     offset(target: T): number;
     remove(node: T): void;
-    iterator(curNode?: T | null): () => T | null;
+    iterator(curNode?: T | null): () => T | Parent | null;
     find(index: number, inclusive?: boolean, includeBreak?: boolean): [T | null, number];
     forEach(callback: (cur: T) => void): void;
     forEachAt(index: number, length: number, callback: (cur: T, offset: number, length: number) => void, includeBreak?: boolean): void;

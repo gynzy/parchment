@@ -1,4 +1,5 @@
 import LinkedNode from './linked-node';
+import { Parent, Blot } from '../blot/abstract/blot';
 
 class LinkedList<T extends LinkedNode> {
   head: T | null;
@@ -69,9 +70,9 @@ class LinkedList<T extends LinkedNode> {
     this.length -= 1;
   }
 
-  iterator(curNode: T | null = this.head): () => T | null {
+  iterator(curNode: T | null = this.head): () => T | Parent | null {
     // TODO use yield when we can
-    return function(): T | null {
+    return function(): T | Parent | null {
       let ret = curNode;
       if (curNode != null) curNode = <T>curNode.next;
       return ret;
@@ -85,10 +86,10 @@ class LinkedList<T extends LinkedNode> {
       // allow empty <br> to be found so that it can be formatted.
       if (includeBreak) {
         let children = cur;
-        while (children && children.children && children.children.length === 1) {
-          children = children.children.head;
+        while (children && (<Parent> children).children && (<Parent> children).children.length === 1) {
+          children = (<Parent>(<Parent> children).children.head);
         }
-        if (children.domNode.nodeName === 'BR') {
+        if ((<Parent> children).domNode.nodeName === 'BR') {
           inclusive = true;
         }
       }
@@ -97,7 +98,7 @@ class LinkedList<T extends LinkedNode> {
         index < length ||
         (inclusive && index === length && (cur.next == null || cur.next.length() !== 0))
       ) {
-        return [cur, index];
+        return [(<T> cur), index];
       }
       index -= length;
     }
@@ -108,7 +109,7 @@ class LinkedList<T extends LinkedNode> {
     let cur,
       next = this.iterator();
     while ((cur = next())) {
-      callback(cur);
+      callback((<T> cur));
     }
   }
 
@@ -126,9 +127,9 @@ class LinkedList<T extends LinkedNode> {
     while ((cur = next()) && curIndex < index + length) {
       let curLength = cur.length();
     if (index > curIndex) {
-        callback(cur, index - curIndex, Math.min(length, curIndex + curLength - index));
+        callback((<T> cur), index - curIndex, Math.min(length, curIndex + curLength - index));
       } else {
-        callback(cur, 0, Math.min(curLength, index + length - curIndex));
+        callback((<T> cur), 0, Math.min(curLength, index + length - curIndex));
       }
       curIndex += curLength;
     }
@@ -145,7 +146,7 @@ class LinkedList<T extends LinkedNode> {
     let cur,
       next = this.iterator();
     while ((cur = next())) {
-      memo = callback(memo, cur);
+      memo = callback(memo, (<T> cur));
     }
     return memo;
   }
