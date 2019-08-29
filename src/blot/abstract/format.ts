@@ -55,7 +55,12 @@ class FormatBlot extends ContainerBlot implements Formattable {
         return mutation.target === this.domNode && mutation.type === 'attributes';
       })
     ) {
-      this.attributes.build();
+      let incorrectScoped: Attributor[] = this.attributes.build();
+      incorrectScoped.forEach(attr => {
+        const val = attr.value(this.domNode, true);
+        attr.remove(this.domNode);
+        this.formatAt(0, this.length(), attr.keyName, val);
+      })
     }
   }
 

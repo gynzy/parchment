@@ -279,9 +279,10 @@ var Attributor = /** @class */ (function () {
     Attributor.prototype.remove = function (node) {
         node.removeAttribute(this.keyName);
     };
-    Attributor.prototype.value = function (node) {
+    Attributor.prototype.value = function (node, forced) {
+        if (forced === void 0) { forced = false; }
         var value = node.getAttribute(this.keyName);
-        if (this.canAdd(node, value) && value) {
+        if ((this.canAdd(node, value) || forced) && value) {
             return value;
         }
         return '';
@@ -624,7 +625,12 @@ var FormatBlot = /** @class */ (function (_super) {
         if (mutations.some(function (mutation) {
             return mutation.target === _this.domNode && mutation.type === 'attributes';
         })) {
-            this.attributes.build();
+            var incorrectScoped = this.attributes.build();
+            incorrectScoped.forEach(function (attr) {
+                var val = attr.value(_this.domNode, true);
+                attr.remove(_this.domNode);
+                _this.formatAt(0, _this.length(), attr.keyName, val);
+            });
         }
     };
     FormatBlot.prototype.wrap = function (name, value) {
@@ -892,15 +898,20 @@ var AttributorStore = /** @class */ (function () {
         var attributes = attributor_1.default.keys(this.domNode);
         var classes = class_1.default.keys(this.domNode);
         var styles = style_1.default.keys(this.domNode);
+        var incorrectScoped = [];
         attributes
             .concat(classes)
             .concat(styles)
             .forEach(function (name) {
             var attr = Registry.query(name, Registry.Scope.ATTRIBUTE);
             if (attr instanceof attributor_1.default) {
+                if (attr.value(_this.domNode) === '') {
+                    return incorrectScoped.push(attr);
+                }
                 _this.attributes[attr.attrName] = attr;
             }
         });
+        return incorrectScoped;
     };
     AttributorStore.prototype.copy = function (target) {
         var _this = this;
@@ -1045,10 +1056,11 @@ var StyleAttributor = /** @class */ (function (_super) {
             node.removeAttribute('style');
         }
     };
-    StyleAttributor.prototype.value = function (node) {
+    StyleAttributor.prototype.value = function (node, forced) {
+        if (forced === void 0) { forced = false; }
         // @ts-ignore
         var value = node.style[camelize(this.keyName)];
-        return this.canAdd(node, value) ? value : '';
+        return (this.canAdd(node, value) || forced) ? value : '';
     };
     return StyleAttributor;
 }(attributor_1.default));

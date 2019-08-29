@@ -29,20 +29,25 @@ class AttributorStore {
     }
   }
 
-  build(): void {
+  build(): Attributor[] {
     this.attributes = {};
     let attributes = Attributor.keys(this.domNode);
     let classes = ClassAttributor.keys(this.domNode);
     let styles = StyleAttributor.keys(this.domNode);
+    let incorrectScoped: Attributor[] = [];
     attributes
       .concat(classes)
       .concat(styles)
       .forEach(name => {
         let attr = Registry.query(name, Registry.Scope.ATTRIBUTE);
         if (attr instanceof Attributor) {
+          if (attr.value(this.domNode) === '') {
+            return incorrectScoped.push(attr);
+          }
           this.attributes[attr.attrName] = attr;
         }
       });
+    return incorrectScoped;
   }
 
   copy(target: Formattable): void {

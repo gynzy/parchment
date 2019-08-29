@@ -34,10 +34,10 @@ class StyleAttributor extends Attributor {
     }
   }
 
-  value(node: HTMLElement): string {
+  value(node: HTMLElement, forced: boolean = false): string {
     // @ts-ignore
     let value = node.style[camelize(this.keyName)];
-    return this.canAdd(node, value) ? value : '';
+    return (this.canAdd(node, value) || forced) ? value : '';
   }
 }
 

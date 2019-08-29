@@ -3,6 +3,6 @@ declare class StyleAttributor extends Attributor {
     static keys(node: Element): string[];
     add(node: HTMLElement, value: string): boolean;
     remove(node: HTMLElement): void;
-    value(node: HTMLElement): string;
+    value(node: HTMLElement, forced?: boolean): string;
 }
 export default StyleAttributor;

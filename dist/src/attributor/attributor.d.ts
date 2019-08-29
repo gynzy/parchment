@@ -13,5 +13,5 @@ export default class Attributor {
     add(node: HTMLElement, value: string): boolean;
     canAdd(node: HTMLElement, value: any): boolean;
     remove(node: HTMLElement): void;
-    value(node: HTMLElement): string;
+    value(node: HTMLElement, forced?: boolean): string;
 }

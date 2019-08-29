@@ -5,7 +5,7 @@ declare class AttributorStore {
     private domNode;
     constructor(domNode: HTMLElement);
     attribute(attribute: Attributor, value: any): void;
-    build(): void;
+    build(): Attributor[];
     copy(target: Formattable): void;
     move(target: Formattable): void;
     values(): {

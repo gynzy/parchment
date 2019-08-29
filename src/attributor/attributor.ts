@@ -51,9 +51,9 @@ export default class Attributor {
     node.removeAttribute(this.keyName);
   }
 
-  value(node: HTMLElement): string {
+  value(node: HTMLElement, forced: boolean = false): string {
     let value = node.getAttribute(this.keyName);
-    if (this.canAdd(node, value) && value) {
+    if ((this.canAdd(node, value) || forced) && value) {
       return value;
     }
     return '';
