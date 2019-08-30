@@ -626,10 +626,9 @@ var FormatBlot = /** @class */ (function (_super) {
             return mutation.target === _this.domNode && mutation.type === 'attributes';
         })) {
             var incorrectScoped = this.attributes.build();
-            incorrectScoped.forEach(function (attr) {
-                var val = attr.value(_this.domNode, true);
-                attr.remove(_this.domNode);
-                _this.formatAt(0, _this.length(), attr.keyName, val);
+            incorrectScoped.forEach(function (_a) {
+                var key = _a.key, value = _a.value;
+                return key && _this.formatAt(0, _this.length(), key, value);
             });
         }
     };
@@ -904,9 +903,30 @@ var AttributorStore = /** @class */ (function () {
             .concat(styles)
             .forEach(function (name) {
             var attr = Registry.query(name, Registry.Scope.ATTRIBUTE);
-            if (attr instanceof attributor_1.default) {
+            if (attr !== null && attr instanceof attributor_1.default) {
+                var origFormatNames = typeof attr.attrName === 'string' && attr.attrName.split('-<alt>');
+                if (origFormatNames && origFormatNames.length > 1) {
+                    origFormatNames[0].split('-').forEach(function (name, i, arr) {
+                        var value = attr.value(_this.domNode, true);
+                        if (i === arr.length - 1)
+                            attr.remove(_this.domNode);
+                        var level = Registry.query(name, Registry.Scope.ATTRIBUTE);
+                        if (level !== null) {
+                            var key = level.keyName;
+                            value = attr.classList && attr.classList[value] || value;
+                            return incorrectScoped.push({ key: key, value: value });
+                        }
+                        level = Registry.query(name, Registry.Scope.BLOT);
+                        if (level) {
+                            var key = level.blotName;
+                            return incorrectScoped.push({ key: key, value: value });
+                        }
+                    });
+                }
                 if (attr.value(_this.domNode) === '') {
-                    return incorrectScoped.push(attr);
+                    var value = attr.value(_this.domNode, true);
+                    attr.remove(_this.domNode);
+                    return incorrectScoped.push({ key: attr.keyName, value: value });
                 }
                 _this.attributes[attr.attrName] = attr;
             }

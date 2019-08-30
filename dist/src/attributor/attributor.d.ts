@@ -8,6 +8,9 @@ export default class Attributor {
     keyName: string;
     scope: Registry.Scope;
     whitelist: string[] | undefined;
+    classList: {
+        [key: string]: any;
+    } | undefined;
     static keys(node: HTMLElement): string[];
     constructor(attrName: string, keyName: string, options?: AttributorOptions);
     add(node: HTMLElement, value: string): boolean;

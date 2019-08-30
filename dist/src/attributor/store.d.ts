@@ -5,7 +5,10 @@ declare class AttributorStore {
     private domNode;
     constructor(domNode: HTMLElement);
     attribute(attribute: Attributor, value: any): void;
-    build(): Attributor[];
+    build(): {
+        key: string;
+        value: string | boolean;
+    }[];
     copy(target: Formattable): void;
     move(target: Formattable): void;
     values(): {

@@ -3,6 +3,8 @@ import ClassAttributor from './class';
 import StyleAttributor from './style';
 import { Formattable } from '../blot/abstract/blot';
 import * as Registry from '../registry';
+import InlineBlot from '../blot/inline';
+import BlockBlot from '../blot/block';
 
 class AttributorStore {
   private attributes: { [key: string]: Attributor } = {};
@@ -29,21 +31,51 @@ class AttributorStore {
     }
   }
 
-  build(): Attributor[] {
+  build(): {key: string, value: string | boolean}[] {
     this.attributes = {};
     let attributes = Attributor.keys(this.domNode);
     let classes = ClassAttributor.keys(this.domNode);
     let styles = StyleAttributor.keys(this.domNode);
-    let incorrectScoped: Attributor[] = [];
+    let incorrectScoped: {key: string, value: string | boolean}[] = [];
     attributes
       .concat(classes)
       .concat(styles)
       .forEach(name => {
-        let attr = Registry.query(name, Registry.Scope.ATTRIBUTE);
-        if (attr instanceof Attributor) {
-          if (attr.value(this.domNode) === '') {
-            return incorrectScoped.push(attr);
+        let attr: Attributor = <Attributor>Registry.query(name, Registry.Scope.ATTRIBUTE);
+        if (attr !== null && attr instanceof Attributor) {
+
+          // begin: custom step during building the attributor store
+
+          // attributes added by browser(webkit) but not supported by quill's own formatting need to be translated
+          let origFormatNames: string[] | boolean = typeof attr.attrName === 'string' && attr.attrName.split('-<alt>');
+          if ( origFormatNames && origFormatNames.length > 1) {
+            origFormatNames[0].split('-').forEach((name, i, arr) => {
+              let value = attr.value(this.domNode, true);
+              if (i === arr.length - 1) attr.remove(this.domNode);
+
+              let level: Attributor | Registry.BlotConstructor | null = <Attributor | null>Registry.query(name, Registry.Scope.ATTRIBUTE);
+              if (level !== null) {
+                let key: string = level.keyName;
+                value = attr.classList && attr.classList[value] || value;
+                return incorrectScoped.push({key, value});
+              }
+
+              level = <Registry.BlotConstructor | null>Registry.query(name, Registry.Scope.BLOT);
+              if (level) {
+                let key: string = level.blotName;
+                return incorrectScoped.push({key, value});
+              }
+            })
           }
+
+          // attributes that are incorrectly scoped need to be re-applied
+          if (attr.value(this.domNode) === '') {
+            const value = attr.value(this.domNode, true);
+            attr.remove(this.domNode);
+            return incorrectScoped.push({key: attr.keyName, value});
+          }
+          // end
+
           this.attributes[attr.attrName] = attr;
         }
       });

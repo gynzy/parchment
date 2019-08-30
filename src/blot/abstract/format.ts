@@ -2,7 +2,6 @@ import Attributor from '../../attributor/attributor';
 import AttributorStore from '../../attributor/store';
 import { Blot, Parent, Formattable } from './blot';
 import ContainerBlot from './container';
-import ShadowBlot from './shadow';
 import * as Registry from '../../registry';
 
 class FormatBlot extends ContainerBlot implements Formattable {
@@ -48,19 +47,15 @@ class FormatBlot extends ContainerBlot implements Formattable {
     return replacement;
   }
 
-  update(mutations: MutationRecord[], context: { [key: string]: any }): void {
+  update(mutations: MutationRecord[], context: { [key: string]: any } ): void {
     super.update(mutations, context);
     if (
       mutations.some(mutation => {
         return mutation.target === this.domNode && mutation.type === 'attributes';
       })
     ) {
-      let incorrectScoped: Attributor[] = this.attributes.build();
-      incorrectScoped.forEach(attr => {
-        const val = attr.value(this.domNode, true);
-        attr.remove(this.domNode);
-        this.formatAt(0, this.length(), attr.keyName, val);
-      })
+      let incorrectScoped: {key: string, value: string | boolean}[] = this.attributes.build();
+      incorrectScoped.forEach(({key, value}) => key && this.formatAt(0, this.length(), key, value));
     }
   }
 

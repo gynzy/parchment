@@ -10,6 +10,8 @@ export default class Attributor {
   keyName: string;
   scope: Registry.Scope;
   whitelist: string[] | undefined;
+  // corresponding class name for the styles
+  classList: { [key: string]: any } | undefined;
 
   static keys(node: HTMLElement): string[] {
     return [].map.call(node.attributes, function(item: Attr) {
